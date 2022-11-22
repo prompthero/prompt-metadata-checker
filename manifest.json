@@ -1,0 +1,33 @@
+{
+  "name": "Autofill PromptHero Uploads",
+  "description": "Automatically insert upload infos saved in the PNG. This extension is not endorsed by or affiliated with PromptHero.",
+  "homepage_url": "https://github.com/HE1CO/autofill-prompthero-uploads",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "/images/icon-16x16.png",
+    "32": "/images/icon-32x32.png",
+    "48": "/images/icon-48x48.png",
+    "128": "/images/icon-128x128.png"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "run_at" : "document_idle",
+      "js": ["pngtoy.min.js", "document.js"],
+      "matches": [
+        "https://prompthero.com/prompt/upload"
+      ]
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://prompthero.com/prompt/upload"
+  ]
+}
