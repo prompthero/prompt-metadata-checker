@@ -133,6 +133,18 @@ function fillUploadForm(program, promptText, negativePromptText, seed, cfg, step
   }
 }
 
-window.addEventListener('load', (event) => {
-    document.getElementById('prompt_main_image').addEventListener('change', readImageFile, false);
-});
+(function () {
+  const addListener = () => {
+    if (window.location.href == 'https://prompthero.com/prompt/upload') {
+      try {
+        const imageUploadField = document.getElementById('prompt_main_image');
+        if (!imageUploadField.hasAttribute('extension-autofill-prompthero-uploads')) {
+          document.getElementById('prompt_main_image').addEventListener('change', readImageFile, false);
+          console.log('Added event listener hashchange');
+          imageUploadField.setAttribute('extension-autofill-prompthero-uploads', true)
+        }
+      } catch (error) { return; }
+    }
+  };
+  setInterval(addListener, 200);
+})();
