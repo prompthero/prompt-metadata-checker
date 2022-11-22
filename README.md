@@ -17,7 +17,7 @@ I'm a big fan of PromptHero and enjoy sharing my prompts with the community. Man
 ## Installation
 1. Download the project in GitHub via the button `Code` → `Download ZIP`
 2. Unpack the ZIP file locally so you can access the files in the folder
-3. Open the extension tab in Chrome: [chrome://extensions/](chrome://extensions/)
+3. Open the extension tab in Chrome: `chrome://extensions/`
 4. Enable `Developer mode` with the switch in the top right corner
 5. Click the `Load unpacked` button
 6. Select the folder of the extension you just downloaded
