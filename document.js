@@ -14,7 +14,7 @@ function decodeChunkData() {
         const textChunk = pngtoy.getChunk("tEXt");
         if (!textChunk) { return; }
         const keyWord = textChunk[0].keyword;
-        const keyText = textChunk[0].text;
+        var keyText = textChunk[0].text;
         if (keyWord == 'parameters') {
             // Extract values from SD webUI image
             program = 'sdWebUi';
@@ -39,7 +39,8 @@ function decodeChunkData() {
         } else if (keyWord == 'Dream') {
             // Extract values from NMKD image
             program = 'nmkd';
-            const rawPromptText = keyText.substring(1, keyText.indexOf('" -s'));
+            keyText = keyText.replace(/["]+/g, '') // Fix for old NMKD versions
+            const rawPromptText = keyText.substring(0, keyText.indexOf(' -s '));
             const amountOfBrackets = (rawPromptText.match(/\[|\]/g) || []).length;
             if (amountOfBrackets != 0 && amountOfBrackets != 2) { return; }
             const regexNegativePromptMatch = rawPromptText.match(/\[([^)]+)\]/);
@@ -49,9 +50,9 @@ function decodeChunkData() {
             } else {
                 promptText = rawPromptText.replace(/,\s*$/,'');
             }
-            const settingsText = keyText.replace(rawPromptText,'').substring(3);
+            const settingsText = keyText.replace(rawPromptText,'');
             seed = settingsText.match(/-S(.*)-W/)[1].trim();
-            cfg = settingsText.match(/-C(.*)--f/)[1].trim();
+            cfg = settingsText.match(/-C(.*?)--/)[1].trim();
             steps = settingsText.match(/-s(.*)-S/)[1].trim();
             width = settingsText.match(/-W(.*)-H/)[1].trim();
             height = settingsText.match(/-H(.*)-C/)[1].trim();
