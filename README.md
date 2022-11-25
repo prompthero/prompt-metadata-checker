@@ -2,8 +2,6 @@
 This Chrome extension automatically inserts upload info saved in the PNG metadata to the [Prompthero upload](https://prompthero.com/prompt/upload).\
 The project is not endorsed by or affiliated with PromptHero.
 
-Latest version: 1.0.1
-
 ![Screencast GIF](/images/screencast-autofill-prompthero-uploads.gif)
 
 ## Motivation
