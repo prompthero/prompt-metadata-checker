@@ -1,8 +1,8 @@
 {
-  "name": "Autofill PromptHero Uploads",
-  "description": "Automatically insert upload infos saved in the PNG. This extension is not endorsed by or affiliated with PromptHero.",
-  "homepage_url": "https://github.com/HE1CO/autofill-prompthero-uploads",
-  "version": "1.0.3",
+  "name": "Postie",
+  "description": "Automatically inserts upload info saved in the PNG metadata to the upload fields of PromptHero, OpenArt, and ArtHub",
+  "homepage_url": "https://github.com/",
+  "version": "1.1.0",
   "manifest_version": 3,
   "icons": {
     "16": "/images/icon-16x16.png",
@@ -15,17 +15,11 @@
   },
   "content_scripts": [
     {
-      "run_at" : "document_idle",
-      "js": ["pngtoy.min.js", "document.js"],
-      "matches": [
-        "https://prompthero.com/*"
-      ]
+      "run_at": "document_idle",
+      "js": ["pngtoy.min.js", "modelHashes.js", "document.js"],
+      "matches": ["https://prompthero.com/*", "https://openart.ai/*", "https://arthub.ai/*"]
     }
   ],
-  "permissions": [
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://prompthero.com/*"
-  ]
+  "permissions": ["scripting"],
+  "host_permissions": ["https://prompthero.com/*", "https://openart.ai/*", "https://arthub.ai/*"]
 }

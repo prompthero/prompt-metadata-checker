@@ -1,176 +1,364 @@
-// eslint-disable-next-line
-var pngtoy = new PngToy();
-
-function decodeChunkData() {
-    var program;
-    var promptText;
-    var negativePromptText;
-    var seed;
-    var cfg;
-    var steps;
-    var width;
-    var height;
-    var sampler;
-    try {
-        const textChunk = pngtoy.getChunk("tEXt");
-        if (!textChunk) return;
-        var keyText;
-        if (textChunk.length > 1) {
-            if (textChunk[1].keyword == "sd-metadata") { program = "invoke"; } // prettier-ignore
-            keyText = textChunk[1].text;
-        } else if (textChunk.length == 1) {
-            if (textChunk[0].keyword == "parameters") { program = "sdWebUi"; } // prettier-ignore
-            keyText = textChunk[0].text;
-        }
-        if (!program) return;
-        if (program == "sdWebUi") {
-            var separateLines = keyText.split(/\r?\n|\r|\n/g);
-            promptText = separateLines[0];
-            if (separateLines[1].startsWith("Negative prompt:")) {
-                negativePromptText = separateLines[1].substring(16).trim();
-            }
-            const settingsTextIndex = negativePromptText ? 2 : 1;
-            const settingsTextArray = separateLines[settingsTextIndex].split(",");
-            var settingsDict = {};
-            settingsTextArray.forEach((element) => {
-                const list = element.split(":");
-                settingsDict[String(list[0]).trim().replace(/\s/g, "")] = String(list[1]).trim();
-            });
-            seed = settingsDict.Seed;
-            cfg = settingsDict.CFGscale;
-            steps = settingsDict.Steps;
-            width = settingsDict.Size.split("x")[0];
-            height = settingsDict.Size.split("x")[1];
-            sampler = settingsDict.Sampler;
-        }
-        if (program == "invoke") {
-            const json = JSON.parse(keyText);
-            const rawPromptText = json.image.prompt[0].prompt;
-            const amountOfBrackets = (rawPromptText.match(/\[|\]/g) || []).length;
-            if (amountOfBrackets != 0 && amountOfBrackets != 2) return;
-            const regexNegativePromptMatch = rawPromptText.match(/\[([^)]+)\]/);
-            if (regexNegativePromptMatch) {
-                negativePromptText = regexNegativePromptMatch[1];
-                promptText = rawPromptText.replace(regexNegativePromptMatch[0], "").replace(/,\s*$/, "");
+class PromptInfo {
+    // Class for extracting and storing prompt info
+    constructor() {
+        this.program = null;
+        this.modelId = null;
+        this.model = null;
+        this.modelVersion = null;
+        this.prompt = null;
+        this.negativePrompt = null;
+        this.seed = null;
+        this.cfg = null;
+        this.steps = null;
+        this.width = null;
+        this.height = null;
+        this.sampler = null;
+    }
+    textToNumber(input) {
+        // returns Number or null
+        let value = Number(String(input).replace(",", "."));
+        if (value.isNaN) return null;
+        return value;
+    }
+    set setModel(modelHash) {
+        [this.modelId, this.model, this.modelVersion] = modelHashes.resolve(modelHash);
+    }
+    set setSeed(seed) {
+        this.seed = this.textToNumber(seed);
+    }
+    set setCfg(cfg) {
+        this.cfg = this.textToNumber(cfg);
+    }
+    set setSteps(steps) {
+        this.steps = this.textToNumber(steps);
+    }
+    set setWidth(width) {
+        this.width = this.textToNumber(width);
+    }
+    set setHeight(height) {
+        this.height = this.textToNumber(height);
+    }
+    set setSampler(sampler) {
+        const samplersDict = {
+            ddim: ["DDIM", "ddim"],
+            plms: ["PLMS", "plms"],
+            k_euler: ["Euler", "k_euler"],
+            k_euler_ancestral: ["Euler a", "k_euler_a", "k_euler_ancestral"],
+            k_heun: ["Heun", "k_heun"],
+            k_dpm_2: ["DPM2", "k_dpm_2"],
+            k_dpm_2_ancestral: ["DPM2 a", "k_dpm_2_a", "k_dpm_2_ancestral"],
+            k_lms: ["LMS", "k_lms"],
+            k_dpmpp_2: ["DPM++ 2M", "k_dpmpp_2"],
+            k_dpmpp_2_ancestral: ["DPM++ 2S a", "k_dpmpp_2_a", "k_dpmpp_2_ancestral"],
+            k_dpm_fast: "DPM fast",
+            k_dpm_adaptive: "DPM adaptive",
+            k_lms_karras: "LMS Karras",
+            k_dpm_2_karras: "DPM2 Karras",
+            k_dpm_2_ancestral_karras: "DPM2 a Karras",
+            k_dpmpp_2_karras: "DPM++ 2M Karras",
+            k_dpmpp_2_ancestral_karras: "DPM++ 2S a Karras",
+        };
+        var key = Object.keys(samplersDict).find((key) => {
+            if (Array.isArray(samplersDict[key])) {
+                return samplersDict[key].includes(sampler);
             } else {
-                promptText = rawPromptText.replace(/,\s*$/, "");
+                return samplersDict[key] == sampler;
             }
-            seed = json.image.seed;
-            cfg = json.image.cfg_scale;
-            steps = json.image.steps;
-            width = json.image.width;
-            height = json.image.height;
-            sampler = json.image.sampler;
+        });
+        this.sampler = key !== undefined ? key : String(sampler).toLowerCase().replace(/\s/g, "_");
+    }
+    decodeExif(pngtoyInstance) {
+        // Translates exif data into prompt info and saves it to the class
+        try {
+            uiLabel.resetNotAutofilledValues();
+            const textChunk = pngtoyInstance.getChunk("tEXt");
+            if (!textChunk) {
+                uiLabel.setMessage("error", "Prompt info could not be found. Only original images generated by Automatic1111, InvokeAI, and NMKD are supported.");
+                return;
+            }
+            var keyText;
+            if (textChunk.length >= 1 && textChunk[0].keyword == "parameters") {
+                this.program = "sdWebUi";
+                keyText = textChunk[0].text;
+            } else if (textChunk.length >= 2 && textChunk[1].keyword == "sd-metadata") {
+                this.program = "invoke";
+                keyText = textChunk[1].text;
+            } else {
+                uiLabel.setMessage("error", "Prompt info could not be read. Only original images generated by Automatic1111, InvokeAI, and NMKD are supported.");
+                return;
+            }
+            if (this.program == "sdWebUi") {
+                var separateLines = keyText.split(/\r?\n|\r|\n/g);
+                this.prompt = separateLines[0];
+                if (separateLines[1].startsWith("Negative prompt:")) {
+                    this.negativePrompt = separateLines[1].substring(16).trim();
+                }
+                const settingsTextIndex = this.negativePrompt !== null ? 2 : 1;
+                const settingsTextArray = separateLines[settingsTextIndex].split(",");
+                var settingsDict = {};
+                settingsTextArray.forEach((element) => {
+                    const list = element.split(":");
+                    settingsDict[String(list[0]).trim().replace(/\s/g, "")] = String(list[1]).trim();
+                });
+                this.setModel = settingsDict.Modelhash;
+                this.setSeed = settingsDict.Seed;
+                this.setCfg = settingsDict.CFGscale;
+                this.setSteps = settingsDict.Steps;
+                this.setWidth = settingsDict.Size.split("x")[0];
+                this.setHeight = settingsDict.Size.split("x")[1];
+                this.setSampler = settingsDict.Sampler;
+            }
+            if (this.program == "invoke") {
+                const json = JSON.parse(keyText);
+                const rawPromptText = json.image.prompt[0].prompt;
+                const amountOfBrackets = (rawPromptText.match(/\[|\]/g) || []).length;
+                if (amountOfBrackets != 0 && amountOfBrackets != 2) return;
+                this.setModel = json.model_hash;
+                const regexNegativePromptMatch = rawPromptText.match(/\[([^)]+)\]/);
+                if (regexNegativePromptMatch) {
+                    this.negativePrompt = regexNegativePromptMatch[1];
+                    this.prompt = rawPromptText.replace(regexNegativePromptMatch[0], "").replace(/,\s*$/, "");
+                } else {
+                    this.prompt = rawPromptText.replace(/,\s*$/, "");
+                }
+                this.setSeed = json.image.seed;
+                this.setCfg = json.image.cfg_scale;
+                this.setSteps = json.image.steps;
+                this.setWidth = json.image.width;
+                this.setHeight = json.image.height;
+                this.setSampler = json.image.sampler;
+            }
+            console.log(this);
+        } catch (error) {
+            uiLabel.setMessage("error", "Something went wrong during reading the prompt info");
+            console.log("Error:", error);
         }
-        // console.log("### program:", program);
-        // console.log("### promptText:", promptText);
-        // console.log("### negativePromptText:", negativePromptText);
-        // console.log("### seed:", seed);
-        // console.log("### cfg:", cfg);
-        // console.log("### steps:", steps);
-        // console.log("### width:", width);
-        // console.log("### height:", height);
-        // console.log("### sampler:", sampler);
-        fillUploadForm(program, promptText, negativePromptText, seed, cfg, steps, width, height, sampler);
-    } catch (error) {
-        console.log("Error:", error);
     }
 }
 
-function readImageFile() {
-    function error(err) {
-        console.log("Error. Could not load PNG file:", err);
+class UiLabel {
+    // Class for creating, managing and updating the UI label
+    successColor = "#34C759";
+    warningColor = "#FFCC02";
+    errorColor = "#FF3C30";
+    constructor() {
+        this.notAutofilledValues = [];
     }
+    set addNotAutofilledValue(value) {
+        this.notAutofilledValues = this.notAutofilledValues.concat(value);
+        this.updateStatus("warning", "Could not autofill the following value" + (this.notAutofilledValues.length > 1 ? "s" : "") + ": " + this.notAutofilledValues.join(", "));
+    }
+    resetNotAutofilledValues() {
+        this.notAutofilledValues = [];
+    }
+    createLabel(siteName) {
+        const htmlIndicator = '<div style="display: flex;margin-top: 8px;"><span style="width: 10px;height: 10px;display: inline-block;background: #34C759;border-radius: 100%;margin-right: 6px;margin-top: 4px;" id="extension-autofill-indicator"></span><label id="extension-autofill-label" style="color: #6c757d;font-size: 14px;width: 100%;max-width: 600px;margin-bottom: 0;line-height: 130%;">Autofill extension ready</label><div>';
+        var imageUploadElement = null;
+        if (siteName === "PromptHero") {
+            imageUploadElement = document.querySelector("#prompt_main_image");
+        } else if (siteName === "OpenArt") {
+            imageUploadElement = document.querySelector(".MuiDropzoneArea-root").parentElement;
+        } else if (siteName === "ArtHub") {
+            imageUploadElement = document.querySelector("#file_input_help");
+        }
+        if (!imageUploadElement) return;
+        imageUploadElement.insertAdjacentHTML("afterend", htmlIndicator);
+    }
+    updateStatus() {
+        if (this.notAutofilledValues.length > 0) {
+            this.setMessage("warning", "Could not autofill the following value" + (this.notAutofilledValues.length > 1 ? "s" : "") + ": " + this.notAutofilledValues.join(", "));
+        } else {
+            this.setMessage("success", "Successfully read prompt info from image metadata");
+        }
+    }
+    setMessage(type, message) {
+        const element = document.getElementById("extension-autofill-label");
+        const indicator = document.getElementById("extension-autofill-indicator");
+        if (!element || !indicator) return;
+        if (type == "success") {
+            indicator.style.backgroundColor = this.successColor;
+            element.innerHTML = "Autofill: " + message;
+        } else if (type == "warning") {
+            indicator.style.backgroundColor = this.warningColor;
+            element.innerHTML = "Autofill Warning: " + message;
+        } else if (type == "error") {
+            indicator.style.backgroundColor = this.errorColor;
+            element.innerHTML = "Autofill Error: " + message;
+        }
+    }
+}
+
+function insertPromptHeroForm(promptInfo) {
+    // Formats and inserts the prompt info into the PromptHero upload page
+    document.getElementById("prompt_prompt").value = promptInfo.prompt;
+    document.getElementById("prompt_negative_prompt").value = promptInfo.negativePrompt ? promptInfo.negativePrompt : "";
+    const modelSelector = document.getElementById("prompt_model_used_slug");
+    modelSelector.value = "";
+    const modelVersionSelector = document.getElementById("prompt_model_used_version");
+    modelVersionSelector.value = "";
+    if (promptInfo.modelId) {
+        var useDefaultModelPlaceholder = false;
+        const modelIdToModel = {
+            87186514: "waifu-diffusion",
+            19910951: "trinart",
+            49326989: "openjourney",
+            43357260: "poolsuite-diffusion",
+            88765365: "funko-diffusion",
+            70061039: "text-to-pokemon",
+            32691941: "arcane-diffusion",
+            60915492: "mo-di-diffusion",
+            64217526: "redshift-diffusion",
+            22408650: "stable-diffusion",
+        };
+        var model = modelIdToModel[promptInfo.modelId] || null;
+        if (!model) {
+            model = "stable-diffusion";
+            useDefaultModelPlaceholder = true;
+            uiLabel.addNotAutofilledValue = ["model", "version"];
+        }
+        modelSelector.value = model;
+        modelSelector.dispatchEvent(new Event("change", { bubbles: true }));
+        if (promptInfo.modelVersion && !useDefaultModelPlaceholder) {
+            const targetNode = modelVersionSelector;
+            const callback = () => {
+                const modelVersionSelectorValues = [...modelVersionSelector.options].map((e) => String(e.value)).filter((e) => e !== "");
+                if (modelVersionSelectorValues.includes(String(promptInfo.modelVersion))) {
+                    modelVersionSelector.value = String(promptInfo.modelVersion);
+                } else {
+                    uiLabel.addNotAutofilledValue = ["model", "version"];
+                }
+                observer.disconnect();
+            };
+            const observer = new MutationObserver(callback);
+            observer.observe(targetNode, { childList: true });
+        }
+    } else {
+        uiLabel.addNotAutofilledValue = ["model", "version"];
+    }
+    document.getElementById("prompt_metadata_seed").value = promptInfo.seed;
+    document.getElementById("prompt_metadata_guidance_scale").value = promptInfo.cfg;
+    document.getElementById("prompt_metadata_steps").value = promptInfo.steps;
+    document.getElementById("prompt_metadata_width").value = promptInfo.width;
+    document.getElementById("prompt_metadata_height").value = promptInfo.height;
+    const promptHeroSamplers = ["ddim", "plms", "k_euler", "k_euler_ancestral", "k_heun", "k_dpm_2", "k_dpm_2_ancestral", "k_lms", "k_dpmpp_2", "k_dpmpp_2_ancestral"];
+    if (promptHeroSamplers.includes(promptInfo.sampler)) {
+        const sampler = promptInfo.sampler;
+        const value = sampler === "k_dpmpp_2" ? "dpm++_2" : sampler === "k_dpmpp_2_ancestral" ? "dpm++_2_ancestral" : sampler;
+        document.getElementById("prompt_metadata_sampler").value = value;
+    } else {
+        document.getElementById("prompt_metadata_sampler").value = "";
+        uiLabel.addNotAutofilledValue = "sampler";
+    }
+    document.getElementById("negative-prompt-collapse").classList.add("show");
+    document.getElementById("other-metadata-collapse").classList.add("show");
+    uiLabel.updateStatus();
+}
+
+function insertOpenArtForm(promptInfo) {
+    // Formats and inserts the prompt info into the OpenArt upload page
+    const prompt = promptInfo.negativePrompt ? promptInfo.prompt + ", -- NEGATIVE PROMPT: " + promptInfo.negativePrompt : promptInfo.prompt;
+    document.querySelector('input[name="prompt"]').value = prompt;
+    document.querySelector('input[name="prompt"]').dispatchEvent(new Event("change", { bubbles: true }));
+    const modelSelector = document.querySelector('input[name="ai_model"]');
+    modelSelector.value = "other";
+    if (promptInfo.modelId === 22408650) {
+        modelSelector.value = "stable_diffusion";
+    }
+    modelSelector.dispatchEvent(new Event("change", { bubbles: true }));
+    uiLabel.updateStatus();
+}
+
+function insertArtHubForm(promptInfo) {
+    // Formats and inserts the prompt info into the ArtHub upload page
+    document.getElementById("message").value = promptInfo.prompt;
+    document.getElementById("message").dispatchEvent(new Event("input", { bubbles: true }));
+    var modelParams = {
+        "Negative Prompt": promptInfo.negativePrompt,
+        Model: promptInfo.model,
+        "Model Version": promptInfo.modelVersion ? "v" + promptInfo.modelVersion : null,
+        Seed: promptInfo.seed,
+        "CFG Scale": promptInfo.cfg,
+        Steps: promptInfo.steps,
+        "Img Heigh": promptInfo.height,
+        "Img Width": promptInfo.width,
+        Sampler: promptInfo.sampler,
+    };
+    modelParams = Object.fromEntries(Object.entries(modelParams).filter((e) => e[1] !== null));
+    const modelParamsString = JSON.stringify(modelParams);
+    document.getElementById("model-params").value = modelParamsString;
+    document.getElementById("model-params").dispatchEvent(new Event("input", { bubbles: true }));
+    if (!promptInfo.model && !promptInfo.modelVersion) uiLabel.addNotAutofilledValue = ["model", "version"];
+    if (!promptInfo.sampler) uiLabel.addNotAutofilledValue = "sampler";
+    uiLabel.updateStatus();
+}
+
+function autofillManager(event, insertFormFunction) {
+    // Reads the image file from the event and passes it to the insertFormFunction
+    function errorHandler(error) {
+        console.log("Error:", error);
+        uiLabel.setMessage("error", "Prompt info could not be found. Only original PNG images generated by Automatic1111, InvokeAI, and NMKD are supported.");
+    }
+    var image;
+    if (event instanceof DragEvent) {
+        image = event.dataTransfer.files[0];
+    } else if (event instanceof Event) {
+        image = event.target.files[0];
+    } else {
+        image = document.querySelector("input[type='file']").files[0];
+    }
+    if (!image) { errorHandler(); return; } // prettier-ignore
     var fr = new FileReader();
     fr.onload = function () {
         var buffer = this.result;
-        pngtoy.fetch(buffer).then(decodeChunkData, error);
+        pngtoy.fetch(buffer).then(() => {
+            var promptInfo = new PromptInfo();
+            promptInfo.decodeExif(pngtoy);
+            if (!promptInfo.prompt) return;
+            insertFormFunction(promptInfo);
+        }, errorHandler);
     };
-    fr.readAsArrayBuffer(this.files[0]);
+    fr.readAsArrayBuffer(image);
 }
 
-function fillUploadForm(program, promptText, negativePromptText, seed, cfg, steps, width, height, sampler) {
-    const sdWebUiSamplersDict = {
-        ddim: "DDIM",
-        plms: "PLMS",
-        k_euler: "Euler",
-        k_euler_ancestral: "Euler a",
-        k_heun: "Heun",
-        k_dpm_2: "DPM2",
-        k_dpm_2_ancestral: "DPM2 a",
-        k_lms: "LMS",
-        k_dpmpp_2: "DPM++ 2M",
-        k_dpmpp_2_ancestral: "DPM++ 2S a",
-        k_dpm_fast: "DPM fast",
-        k_dpm_adaptive: "DPM adaptive",
-        k_lms_karras: "LMS Karras",
-        k_dpm_2_karras: "DPM2 Karras",
-        k_dpm_2_ancestral_karras: "DPM2 a Karras",
-        k_dpmpp_2_karras: "DPM++ 2M Karras",
-        k_dpmpp_2_ancestral_karras: "DPM++ 2S a Karras",
-    };
-    const invokeSamplersDict = {
-        ddim: "ddim",
-        plms: "plms",
-        k_euler: "k_euler",
-        k_euler_ancestral: "k_euler_a",
-        k_heun: "k_heun",
-        k_dpm_2: "k_dpm_2",
-        k_dpm_2_ancestral: "k_dpm_2_a",
-        k_lms: "k_lms",
-        k_dpmpp_2: "k_dpmpp_2",
-        k_dpmpp_2_ancestral: "k_dpmpp_2_a",
-    };
-    document.getElementById("prompt_prompt").value = promptText;
-    if (negativePromptText) {
-        document.getElementById("prompt_negative_prompt").value = negativePromptText;
-    } else {
-        document.getElementById("prompt_negative_prompt").value = "";
-    }
-    document.getElementById("prompt_metadata_seed").value = seed;
-    document.getElementById("prompt_metadata_guidance_scale").value = cfg;
-    document.getElementById("prompt_metadata_steps").value = steps;
-    document.getElementById("prompt_metadata_width").value = width;
-    document.getElementById("prompt_metadata_height").value = height;
-    var samplerOption;
-    if (program == "sdWebUi") {
-        samplerOption = Object.keys(sdWebUiSamplersDict).find((key) => sdWebUiSamplersDict[key] === sampler);
-    } else if (program == "invoke") {
-        samplerOption = Object.keys(invokeSamplersDict).find((key) => invokeSamplersDict[key] === sampler);
-    }
-    if (samplerOption) {
-        if (samplerOption == "k_dpmpp_2") {
-            document.getElementById("prompt_metadata_sampler").value = "dpm++_2";
-        } else if (samplerOption == "k_dpmpp_2_ancestral") {
-            document.getElementById("prompt_metadata_sampler").value = "dpm++_2_ancestral";
-        } else {
-            document.getElementById("prompt_metadata_sampler").value = samplerOption;
+function addListener(selector, event, inputEventBool, insertFormFunction) {
+    // Adds an event listener to the element specified by the selector
+    // returns: bool if listener was added
+    const element = document.querySelector(selector);
+    if (!element) return false;
+    if (!element.hasAttribute("extension-autofill-registered")) {
+        element.addEventListener(event, (event) => {
+            autofillManager(event, insertFormFunction);
+        });
+        if (inputEventBool) {
+            element.addEventListener("input", (event) => {
+                autofillManager(event, insertFormFunction);
+            });
         }
+        element.setAttribute("extension-autofill-registered", true);
+        return true;
     } else {
-        document.getElementById("prompt_metadata_sampler").value = "";
-    }
-    var negativePromptElement = document.getElementById("negative-prompt-collapse");
-    var otherMetadataElement = document.getElementById("other-metadata-collapse");
-    if (negativePromptElement && otherMetadataElement) {
-        negativePromptElement.classList.add("show");
-        otherMetadataElement.classList.add("show");
+        return false;
     }
 }
 
-(function () {
-    const addListener = () => {
-        if (window.location.href == "https://prompthero.com/prompt/upload") {
-            try {
-                const imageUploadField = document.getElementById("prompt_main_image");
-                if (!imageUploadField.hasAttribute("extension-autofill-prompthero-uploads")) {
-                    document.getElementById("prompt_main_image").addEventListener("change", readImageFile, false);
-                    // console.log("Added event listener hashchange");
-                    imageUploadField.setAttribute("extension-autofill-prompthero-uploads", true);
-                }
-            } catch (error) {
-                return;
-            }
-        }
-    };
-    setInterval(addListener, 200);
-})();
+function listenerManager() {
+    // Calls the addListener function for each supported site with correstonding parameters
+    const url = window.location.href;
+    if (url.startsWith("https://prompthero.com/prompt/upload")) {
+        const success = addListener("#prompt_main_image", "change", false, insertPromptHeroForm);
+        if (success) { uiLabel.createLabel("PromptHero"); } // prettier-ignore
+    } else if (url.startsWith("https://openart.ai/post")) {
+        const success = addListener(".MuiDropzoneArea-root", "drop", true, insertOpenArtForm);
+        if (success) { uiLabel.createLabel("OpenArt"); } // prettier-ignore
+    } else if (url.startsWith("https://arthub.ai/upload")) {
+        const success = addListener(".dropzone-container", "drop", true, insertArtHubForm);
+        if (success) { uiLabel.createLabel("ArtHub"); } // prettier-ignore
+    }
+}
+
+// eslint-disable-next-line
+var pngtoy = new PngToy();
+// eslint-disable-next-line
+var modelHashes = new ModelHashes();
+var uiLabel = new UiLabel();
+setInterval(listenerManager, 100);
