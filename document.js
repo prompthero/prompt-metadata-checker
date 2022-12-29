@@ -17,7 +17,7 @@ class PromptInfo {
     textToNumber(input) {
         // returns Number or null
         let value = Number(String(input).replace(",", "."));
-        if (value.isNaN) return null;
+        if (isNaN(value)) return null;
         return value;
     }
     set setModel(modelHash) {
