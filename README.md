@@ -19,6 +19,7 @@ I'm a big fan of AI art and enjoy sharing my prompts with the community. Manuall
 
 -   NMKD: The model hash is not saved in the PNG metadata, so the model name and version can't be auto-filled
 -   General: Only the 35 model names and versions can be auto-filled which are stored in the modelHashes.js
+-   General: Inpainting overwrites the original prompt info, so the extension will autofill the inpaint prompt
 
 ## Installation
 
