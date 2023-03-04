@@ -3,7 +3,8 @@
 This Chrome extension automatically inserts upload info saved in the PNG metadata to the upload fields of [PromptHero](https://prompthero.com/prompt/upload), [OpenArt](https://openart.ai/post), and [ArtHub](https://arthub.ai/upload).\
 Disclaimer: This extension is not endorsed by or affiliated with PromptHero, OpenArt, or ArtHub.
 
-![Screencast](/images/screencast-readme.gif)
+⚠️ @HE1CO: @TODO: Change username in URL of image below
+![Screencast](https://raw.githubusercontent.com/drhino/Postie/screencast/screencast-readme.gif)
 
 ## Motivation
 
