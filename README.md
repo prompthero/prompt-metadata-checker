@@ -23,12 +23,14 @@ I'm a big fan of AI art and enjoy sharing my prompts with the community. Manuall
 
 ## Installation
 
-1. Download the project in GitHub via the button `Code` → `Download ZIP`
-2. Unpack the ZIP file locally so you can access the files in the folder
-3. Open the extension tab in Chrome: `chrome://extensions/`
-4. Enable `Developer mode` with the switch in the top right corner
-5. Click the `Load unpacked` button
-6. Select the folder of the extension you just downloaded
+1. [Download](https://github.com/HE1CO/Postie/archive/refs/heads/main.zip) the project from GitHub via the button `Code` → `Download ZIP`
+2. Unpack the ZIP-file.
+3. Open the extension tab in Google Chrome by navigating to: `chrome://extensions`
+4. Enable `Developer mode` by toggling the switch, found at the top right corner of that window.
+5. Drag the directory (of the unpacked ZIP-file) to the `chrome://extensions` window. \
+Or click the `Load unpacked` button and choose that directory.
+
+Note: Do not (re)move that directory. The extension will not be able to load (until you add it again).
 
 ## Contact
 
