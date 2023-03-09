@@ -1,8 +1,8 @@
 {
-  "name": "Postie",
-  "description": "Automatically inserts upload info saved in the PNG metadata to the upload fields of PromptHero, OpenArt, and ArtHub",
-  "homepage_url": "https://github.com/",
-  "version": "1.1.0",
+  "name": "HE1CO/Postie",
+  "description": "Populates the upload info on PromptHero, OpenArt, and ArtHub (using the JPEG/PNG metadata)",
+  "homepage_url": "https://github.com/HE1CO/Postie",
+  "version": "2.0.0",
   "manifest_version": 3,
   "icons": {
     "16": "/images/icon-16x16.png",
@@ -15,11 +15,21 @@
   },
   "content_scripts": [
     {
-      "run_at": "document_idle",
-      "js": ["pngtoy.min.js", "modelHashes.js", "document.js"],
-      "matches": ["https://prompthero.com/*", "https://openart.ai/*", "https://arthub.ai/*"]
+      "js": [
+        "src/getTextFromImage.js",
+        "src/findSamplerByName.js",
+        "src/findModelByHash.js",
+        "src/hashes.js",
+        "src/insertPromptHeroForm.js",
+        "src/insertArtHubForm.js",
+        "src/insertOpenArtForm.js",
+        "document.js"
+      ],
+      "matches": [
+        "https://prompthero.com/prompt/upload",
+        "https://openart.ai/post",
+        "https://arthub.ai/upload"
+      ]
     }
-  ],
-  "permissions": ["scripting"],
-  "host_permissions": ["https://prompthero.com/*", "https://openart.ai/*", "https://arthub.ai/*"]
+  ]
 }
