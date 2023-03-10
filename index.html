@@ -33,6 +33,27 @@
   <!-- FILEPOND -->
   <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
   <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+
+
+  <script type="importmap" data-turbo-track="reload">{
+    "imports": {
+      "application": "./src/application.js",
+      "controllers": "./src/controllers/index.js",
+      "controllers/application": "./src/controllers/application.js",
+      "controllers/prompts/upload_controller": "./src/controllers/prompts/upload_controller.js",
+      "@hotwired/stimulus": "https://unpkg.com/@hotwired/stimulus@3.2.1/dist/stimulus.js",
+      "@hotwired/stimulus-loading": "./src/vendor/@hotwired/stimulus-loading/stimulus-loading.js",
+      "filepond": "https://ga.jspm.io/npm:filepond@4.30.4/dist/filepond.js",
+      "filepond-plugin-image-preview": "https://ga.jspm.io/npm:filepond-plugin-image-preview@4.6.11/dist/filepond-plugin-image-preview.js",
+      "filepond-plugin-image-resize": "https://ga.jspm.io/npm:filepond-plugin-image-resize@2.0.10/dist/filepond-plugin-image-resize.js",
+      "filepond-plugin-file-validate-type": "https://ga.jspm.io/npm:filepond-plugin-file-validate-type@1.2.8/dist/filepond-plugin-file-validate-type.js"
+    }
+  }</script>
+
+  <script type="module">
+    import "application"
+  </script>
+
 </head>
 
 <body class="">
