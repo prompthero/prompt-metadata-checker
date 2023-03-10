@@ -1,0 +1,26 @@
+.prompt-upload-container {
+  height: 80vh;
+}
+
+.prompt-upload-container h1 {
+  font-size: 2rem;
+}
+
+.filepond--root .filepond--drop-label {
+  height: 100%;
+}
+
+.prompt-upload-metadata-area {
+  position: relative;
+}
+
+.prompt-upload-form-area{
+  height: 100%;
+}
+
+.prompt-upload-btn-area {
+  position: absolute;
+  bottom: 0px;
+  padding: 1.5em 1em 0 1em;
+  border-top: 1px solid rgba(0, 0, 0, 0.03);
+}
