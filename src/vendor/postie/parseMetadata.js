@@ -1,5 +1,7 @@
+import getTextFromImage from "vendor/postie/getTextFromImage"
+
 // Parses the PNG/JPEG metadata
-const parseMetadata = event => {
+const parseMetadata = file => {
   const fr = new FileReader()
 
   fr.onload = () => {
@@ -75,8 +77,10 @@ const parseMetadata = event => {
     embed.negative_prompt = normalizer(embed.negative_prompt)
 
     // Handles the matching website
-    insertFormFunction(embed)
+    console.log("Metadata parsed!", embed)
   }
 
-  fr.readAsArrayBuffer( (event.dataTransfer ?? event.target).files[0] )
+  fr.readAsArrayBuffer(file)
 }
+
+export default parseMetadata;

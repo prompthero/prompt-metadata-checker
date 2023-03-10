@@ -5,8 +5,8 @@ import FilePondPluginImageResize from 'filepond-plugin-image-resize';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 
-PngToy = window.PngToy
-import PromptInfo from "vendor/he1co_postie/prompt_info";
+import parseMetadata from "vendor/postie/parseMetadata";
+
 export default class extends Controller {
   static targets = [ "prompt", "negativePrompt", "modelUsed", "modelVersion", "sampler", "seed", "guidance_scale", "steps", "width", "height", "modelHash", "programUsed" ]
 
@@ -32,33 +32,7 @@ export default class extends Controller {
         return;
       }
 
-      var pngtoy = new PngToy();
-
-      var fr = new FileReader();
-
-      var that = this;
-
-      fr.onload = function () {
-
-        var buffer = this.result;
-
-        pngtoy.fetch(buffer).then( () => {
-          var promptInfo = new PromptInfo();
-
-          promptInfo.decodeExif(pngtoy);
-
-          if (!promptInfo.prompt){
-            console.warn("No prompt metadata found, leaving form as is...")
-          }
-          else {
-            console.log("Prompt metadata found. Filling up form...")
-            that.fillUpFormWithPromptInfo(promptInfo);
-          }
-        }, (e) => { console.error('Error decoding metadata with PngToy', e) });
-
-      };
-
-      fr.readAsArrayBuffer(file.file);
+      parseMetadata(file.file);
 
     });
   }

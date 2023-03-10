@@ -105,3 +105,6 @@ const getTextFromImage = arrayBuffer => {
 
   throw new Error('Only JPEG and PNG files are supported')
 }
+
+
+export default getTextFromImage;
