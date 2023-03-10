@@ -1,4 +1,4 @@
-import hashes from "vendor/postie/hashes"
+import hashes from "vendor/postie/modelHashes"
 
 const findModelByHash = hash => {
   if (hash) {
