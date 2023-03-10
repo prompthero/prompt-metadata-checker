@@ -1,26 +1,5 @@
 const insertPromptHeroForm = async(promptInfo) => {
 
-	console.log(promptInfo)
-
-	// Shows the negative prompt box, if not shown
-	document.getElementById('negative-prompt-collapse').classList.add('show')
-	document.querySelector('a[data-target="#negative-prompt-collapse"]').style.display = 'none'
-
-	document.getElementById('prompt_negative_prompt').setAttribute('placeholder', '')
-	document.getElementById('prompt_prompt').setAttribute('placeholder', '')
-
-	// Shows the `more metadata`, if not shown
-	document.getElementById('other-metadata-collapse').classList.add('show')
-	document.querySelector('a[data-target="#other-metadata-collapse"]').style.display = 'none'
-
-	const findUpscaler = hires_upscaler => {
-		if (hires_upscaler && hires_upscaler.indexOf('ESRGAN 4x') !== -1) {
-			return 'ESRGAN 4x'
-		} else {
-			return ''
-		}
-	}
-
 	// querySelector: value
 	const map = {
 		'#prompt_prompt':                      promptInfo.prompt,

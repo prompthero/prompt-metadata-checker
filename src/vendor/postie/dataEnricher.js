@@ -1,11 +1,31 @@
+const findModelByHash = hash => {
+  if (hash) {
+    for (const [model, versions] of Object.entries(hashes)) {
+      for (const [version, hashes] of Object.entries(versions)) {
+
+        // Matches hash from Civit AI
+        if (hashes.includes(hash.toUpperCase())) {
+          return { model, version }
+        }
+
+        // Matches hash from Hugging Face
+        if (hashes.includes(hash.toLowerCase())) {
+          return { model, version }
+        }
+      }
+    }
+  }
+
+  return { model: undefined, version: undefined }
+}
+
+
 /**
  * @param {string} sampler
  * @returns {string}
- */
+*/
 const findSamplerByName = sampler => {
-
   // @TODO: are these mappings correct? and complete?
-
   const samplersDict = {
     "ddim":                      ["DDIM", "ddim"],
     "plms":                      ["PLMS", "plms"],
@@ -34,3 +54,21 @@ const findSamplerByName = sampler => {
         x => x === sampler.toLowerCase() || samplersDict[x].includes(sampler)
     ) ?? sampler
 }
+
+
+/**
+ * @param {string} hires_upscaler
+ * @returns {string}
+*/
+const findUpscaler = hires_upscaler => {
+  if (hires_upscaler && hires_upscaler.indexOf('ESRGAN 4x') !== -1) {
+    return 'ESRGAN 4x'
+  }
+  else if (hires_upscaler && hires_upscaler.indexOf('CodeFormer') !== -1) {
+    return 'CodeFormer'
+  } else {
+    return ''
+  }
+}
+
+export { findModelByHash, findSamplerByName, findUpscaler };
