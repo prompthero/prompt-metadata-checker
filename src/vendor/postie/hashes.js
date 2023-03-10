@@ -570,3 +570,5 @@ const hashes = {
     ]
   }
 }
+
+export default hashes;

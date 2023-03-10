@@ -1,3 +1,5 @@
+import hashes from "vendor/postie/hashes"
+
 const findModelByHash = hash => {
   if (hash) {
     for (const [model, versions] of Object.entries(hashes)) {

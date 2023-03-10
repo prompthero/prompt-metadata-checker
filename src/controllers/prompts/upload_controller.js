@@ -32,7 +32,9 @@ export default class extends Controller {
         return;
       }
 
-      parseMetadata(file.file);
+      parseMetadata(file.file, (embed) => {
+        console.log("Processing parsed metadata...", embed)
+      });
 
     });
   }

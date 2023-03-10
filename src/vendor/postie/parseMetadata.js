@@ -1,7 +1,9 @@
 import getTextFromImage from "vendor/postie/getTextFromImage"
 
+import { findSamplerByName, findUpscaler, findModelByHash } from "vendor/postie/dataEnricher"
+
 // Parses the PNG/JPEG metadata
-const parseMetadata = file => {
+const parseMetadata = (file, callback) => {
   const fr = new FileReader()
 
   fr.onload = () => {
@@ -77,10 +79,28 @@ const parseMetadata = file => {
     embed.negative_prompt = normalizer(embed.negative_prompt)
 
     // Handles the matching website
-    console.log("Metadata parsed!", embed)
+    console.log("Metadata parsed!", embed);
+    embed = enrichMetadataForPromptHero(embed);
+    callback(embed);
   }
 
   fr.readAsArrayBuffer(file)
+}
+
+const enrichMetadataForPromptHero = promptInfo => {
+  var richPromptInfo = promptInfo;
+
+  richPromptInfo.sampler_raw = promptInfo.sampler;
+  richPromptInfo.sampler = findSamplerByName(promptInfo.sampler);
+
+  richPromptInfo.upscaler_raw = promptInfo.hires_upscaler || "";
+  richPromptInfo.upscaler = findUpscaler(promptInfo.hires_upscaler);
+
+  const { model, version } = findModelByHash(promptInfo.model_hash)
+  richPromptInfo.model_used = model;
+  richPromptInfo.model_used_version = version;
+
+  return richPromptInfo;
 }
 
 export default parseMetadata;
