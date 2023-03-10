@@ -30,6 +30,8 @@ const parseMetadata = (file, callback) => {
       // Everything that's not between square brackets
       // Same as above but just the other way around
       embed.prompt = embed.prompt.match(/[^\[\]]+(?=\[(.*)\]|$)/g).join(', ')
+
+      embed.program_used = "InvokeAI"
     }
     catch (e) {
       // Rethrow unless parsing as JSON failed
@@ -67,6 +69,8 @@ const parseMetadata = (file, callback) => {
         width,
         height,
       }
+
+      embed.program_used = "AUTOMATIC1111"
     }
 
     // Normalization
