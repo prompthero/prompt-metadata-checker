@@ -1,4 +1,4 @@
-import getTextFromImage from "vendor/postie/getTextFromImage"
+import getTextFromImage from "vendor/postie/exifMetadataExtractor"
 
 import { findSamplerByName, findUpscaler, findModelByHash } from "vendor/postie/dataEnricher"
 
