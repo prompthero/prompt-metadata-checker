@@ -109,8 +109,7 @@
                 <div class="col">
                   <div class="form-group mt-4">
                     <label for="prompt_model_used_slug">Model</label>
-                    <select class="form-control" required="required"
-                      onchange="window.populateModelVersionSelectField(this.value)"
+                    <select class="form-control" required="required" onchange="console.log('stub -- model changed')"
                       data-prompts--upload-target="modelUsed" name="prompt[model_used_slug]"
                       id="prompt_model_used_slug">
                       <option value="">-- Select Model --</option>
@@ -146,10 +145,8 @@
                 <div class="col">
                   <div class="form-group mt-4">
                     <label for="prompt_model_used_version">Version</label>
-                    <select class="form-control" data-prompts--upload-target="modelVersion"
-                      name="prompt[model_used_version]" id="prompt_model_used_version">
-                      <option value="">-- Select Model Version --</option>
-                    </select>
+                    <input type="text" class="form-control" data-prompts--upload-target="modelVersion"
+                      name="prompt[model_used_version]" id="prompt_model_used_version" />
                   </div>
                 </div>
               </div>

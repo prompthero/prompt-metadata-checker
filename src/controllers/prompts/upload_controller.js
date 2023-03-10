@@ -50,6 +50,8 @@ export default class extends Controller {
     if(promptInfo.model_used){
       this.modelUsedTarget.value = promptInfo.model_used.toLowerCase();
       this.modelVersionTarget.value = promptInfo.model_used_version;
+
+      this.insertModelVersion(promptInfo)
     }
 
     this.samplerTarget.value = promptInfo.sampler;
@@ -66,6 +68,59 @@ export default class extends Controller {
     this.upscalerTarget.value = promptInfo.upscaler;
     this.denoisingStrengthTarget.value = promptInfo.denoising_strength;
     this.maskBlurTarget.value = promptInfo.mask_blur;
-
   }
+
+  insertModelVersion(promptInfo){
+    const modelVers = document.getElementById('prompt_model_used_version')
+  
+    if (promptInfo.model_used === undefined)
+      return
+  
+    // Behaviour of prompthero:
+    // First the DOM tree of the `modelVers` is reset
+    // Then an AJAX request is sent to fetch the versions for that model
+    // Finally the DOM tree of `modelVers` is populated with those contents
+    const onDone = new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        console.log("here")
+        // Means the AJAX has not finished, usually it's already finished
+        // Test this properly by Throttling offline (in Google Chrome)
+        //  in that case the Promise should never resolve (when offline)
+        if (modelVers.innerText === '-- Select Model Version --')
+          return
+  
+        observer.disconnect() // Stops listening for changes in the DOM
+        resolve() // Continues, now the model version can be assigned
+      })
+      // Listens for changes within the DOM tree of the model version <select>
+      observer.observe(modelVers, {
+        childList: true
+      })
+    })
+  
+    const modelSlug = document.getElementById('prompt_model_used_slug')
+
+    // Triggers the AJAX of prompthero
+    modelSlug.dispatchEvent(new Event('change'))
+
+    // Waits until the AJAX is done
+    onDone.then( e => {
+      modelVers.value = promptInfo.model_used_version
+    });
+
+    /*
+    if (modelSlug.value)
+      modelSlug.setAttribute('disabled', true)
+    else
+      modelSlug.value = ''
+  
+    if (modelVers.value)
+      modelVers.setAttribute('disabled', true)
+    else
+      modelVers.value = ''
+    */
+    if (!modelSlug.value) modelSlug.value = ''
+    if (!modelVers.value) modelVers.value = ''
+  }
+
 }
