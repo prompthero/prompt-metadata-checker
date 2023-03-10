@@ -32,8 +32,8 @@ export default class extends Controller {
         return;
       }
 
-      parseMetadata(file.file, (embed) => {
-        console.log("Processing parsed metadata...", embed)
+      parseMetadata(file.file, (promptInfo) => {
+        this.fillUpFormWithPromptInfo(promptInfo);
       });
 
     });
@@ -42,26 +42,26 @@ export default class extends Controller {
   fillUpFormWithPromptInfo(promptInfo){
     this.promptTarget.value = promptInfo.prompt;
 
-    if(promptInfo.negativePrompt){
-      this.negativePromptTarget.value = promptInfo.negativePrompt;
+    if(promptInfo.negative_prompt){
+      this.negativePromptTarget.value = promptInfo.negative_prompt;
       $("#negativePromptButtonToggler").click();
     }
 
-    if(promptInfo.model){
-      this.modelUsedTarget.value = promptInfo.model.toLowerCase();
+    if(promptInfo.model_used){
+      this.modelUsedTarget.value = promptInfo.model_used.toLowerCase();
+      this.modelVersionTarget.value = promptInfo.model_used_version;
     }
-    this.modelVersionTarget.value = promptInfo.modelVersion;
 
     this.samplerTarget.value = promptInfo.sampler;
     this.seedTarget.value = promptInfo.seed;
-    this.guidance_scaleTarget.value = promptInfo.cfg;
+    this.guidance_scaleTarget.value = promptInfo.cfg_scale;
     this.stepsTarget.value = promptInfo.steps;
 
     this.widthTarget.value = promptInfo.width;
     this.heightTarget.value = promptInfo.height;
-    this.modelHashTarget.value = promptInfo.modelId;
+    this.modelHashTarget.value = promptInfo.model_hash;
 
-    this.programUsedTarget.value = promptInfo.program;
+    this.programUsedTarget.value = promptInfo.program_used;
 
   }
 }
