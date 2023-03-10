@@ -1,8 +1,6 @@
 (async() => {
     const [ selector, insertFormFunction ] = {
-        'prompthero.com': [ '#prompt_main_image',    insertPromptHeroForm ],
-        'openart.ai':     [ '.MuiDropzoneArea-root', insertOpenArtForm    ],
-        'arthub.ai':      [ '.dropzone-container',   insertArtHubForm     ]
+        'prompthero.com': [ '#prompt_main_image',    insertPromptHeroForm ]
     }[window.location.hostname]
 
     try {
