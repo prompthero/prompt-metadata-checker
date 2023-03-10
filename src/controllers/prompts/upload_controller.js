@@ -8,7 +8,7 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import parseMetadata from "vendor/postie/parseMetadata";
 
 export default class extends Controller {
-  static targets = [ "prompt", "negativePrompt", "modelUsed", "modelVersion", "sampler", "seed", "guidance_scale", "steps", "width", "height", "modelHash", "programUsed" ]
+  static targets = [ "prompt", "negativePrompt", "modelUsed", "modelVersion", "sampler", "seed", "guidance_scale", "steps", "width", "height", "modelHash", "programUsed", "upscaler", "denoisingStrength", "maskBlur" ]
 
   initialize() {
     FilePond.registerPlugin(FilePondPluginImageResize, FilePondPluginImagePreview, FilePondPluginFileValidateType);
@@ -62,6 +62,10 @@ export default class extends Controller {
     this.modelHashTarget.value = promptInfo.model_hash;
 
     this.programUsedTarget.value = promptInfo.program_used;
+
+    this.upscalerTarget.value = promptInfo.upscaler;
+    this.denoisingStrengthTarget.value = promptInfo.denoising_strength;
+    this.maskBlurTarget.value = promptInfo.mask_blur;
 
   }
 }

@@ -282,7 +282,8 @@
                 <div class="col">
                   <div class="form-group mt-3">
                     <label for="prompt_metadata_upscaler">Upscaler</label>
-                    <select class="form-control" name="prompt[metadata][upscaler]" id="prompt_metadata_upscaler">
+                    <select class="form-control" name="prompt[metadata][upscaler]" id="prompt_metadata_upscaler"
+                      data-prompts--upload-target="upscaler">
                       <option value="">-- Select Sampler --</option>
                       <option value="ESRGAN 4x">ESRGAN 4x</option>
                       <option value="CodeFormer">CodeFormer</option>
@@ -294,7 +295,8 @@
                   <div class="form-group mt-3">
                     <label for="prompt_metadata_denoising_strength">Denoising strength</label>
                     <input class="form-control" min="0" max="1" step="0.01" type="number"
-                      name="prompt[metadata][denoising_strength]" id="prompt_metadata_denoising_strength">
+                      name="prompt[metadata][denoising_strength]" id="prompt_metadata_denoising_strength"
+                      data-prompts--upload-target="denoisingStrength">
                   </div>
                 </div>
 
@@ -302,7 +304,8 @@
                   <div class="form-group mt-3">
                     <label for="prompt_metadata_mask_blur">Mask blur</label>
                     <input class="form-control" min="0" max="100" step="1" type="number"
-                      name="prompt[metadata][mask_blur]" id="prompt_metadata_mask_blur">
+                      name="prompt[metadata][mask_blur]" id="prompt_metadata_mask_blur"
+                      data-prompts--upload-target="maskBlur">
                   </div>
                 </div>
               </div>
