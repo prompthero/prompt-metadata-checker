@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <link rel="apple-touch-icon" sizes="120x120" href="https://prompthero.com/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://prompthero.com/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://prompthero.com/favicon/favicon-16x16.png">
+  <link rel="manifest" href="https://prompthero.com/favicon/site.webmanifest">
+  <link rel="mask-icon" href="https://prompthero.com/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="https://prompthero.com/favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="https://prompthero.com/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
+  <title>PromptHero - Prompt Metadata Checker</title>
+
+  <!-- FONTAWESOME -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+    integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- BOOTSTRAP -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous"
+    as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+      integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  </noscript>
+
+  <!-- FILEPOND -->
+  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+  <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+</head>
+
+<body class="">
+
+
+  <form>
+    <div class="container-fluid prompt-upload-container" data-controller="prompts--upload">
+      <div class="row h-100 py-5 px-3">
+
+        <div class="col-6 ">
+          <input type="file" name="prompt[main_image]" class="filepond h-100" id="filepond-input" required />
+        </div>
+
+        <div class="col-6 ">
+          <div class="prompt-upload-metadata-area h-100">
+
+            <h1>Prompt Metadata Checker <span style="font-size: 14px;">by PromptHero</span></h1>
+
+            <div class="prompt-upload-form-area">
+              <div class="form-group mt-3">
+                <label for="prompt_prompt">Prompt</label>
+                <textarea rows="2" class="form-control"
+                  placeholder="An astronaut playing guitar at Coachella, psychodelic background, photorealistic, f1.4, 4k..."
+                  required="required" data-prompts--upload-target="prompt" name="prompt[prompt]"
+                  id="prompt_prompt"></textarea>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="prompt_negative_prompt">Negative Prompt</label>
+                <textarea rows="2" class="form-control"
+                  placeholder="black and white, blur, blurry, soft, blush, filter, noise, deformed, defective..."
+                  data-prompts--upload-target="negativePrompt" name="prompt[negative_prompt]"
+                  id="prompt_negative_prompt"></textarea>
+              </div>
+
+              <div class="row">
+                <div class="col">
+                  <div class="form-group mt-4">
+                    <label for="prompt_model_used_slug">Model</label>
+                    <select class="form-control" required="required"
+                      onchange="window.populateModelVersionSelectField(this.value)"
+                      data-prompts--upload-target="modelUsed" name="prompt[model_used_slug]"
+                      id="prompt_model_used_slug">
+                      <option value="">-- Select Model --</option>
+                      <option value="stable-diffusion">Stable Diffusion</option>
+                      <option value="midjourney">Midjourney</option>
+                      <option value="openjourney">Openjourney</option>
+                      <option value="dall-e">DALL-E</option>
+                      <option value="dreamshaper">DreamShaper</option>
+                      <option value="realistic-vision">Realistic Vision</option>
+                      <option value="deliberate">Deliberate</option>
+                      <option value="dreamlike-photoreal">Dreamlike Photoreal</option>
+                      <option value="dreamlike-diffusion">Dreamlike Diffusion</option>
+                      <option value="anything">Anything</option>
+                      <option value="protogen">Protogen</option>
+                      <option value="abyssorangemix">AbyssOrangeMix</option>
+                      <option value="grapefruit">Grapefruit</option>
+                      <option value="kenshi">Kenshi</option>
+                      <option value="analog-diffusion">Analog Diffusion</option>
+                      <option value="synthwavepunk">SynthwavePunk</option>
+                      <option value="illuminati-diffusion">Illuminati Diffusion</option>
+                      <option value="arcane-diffusion">Arcane Diffusion</option>
+                      <option value="mo-di-diffusion">Mo-Di Diffusion</option>
+                      <option value="redshift-diffusion">Redshift Diffusion</option>
+                      <option value="waifu-diffusion">Waifu Diffusion</option>
+                      <option value="trinart">TrinArt</option>
+                      <option value="poolsuite-diffusion">Poolsuite Diffusion</option>
+                      <option value="funko-diffusion">Funko Diffusion</option>
+                      <option value="text-to-pokemon">Text to Pokémon</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-4">
+                    <label for="prompt_model_used_version">Version</label>
+                    <select class="form-control" data-prompts--upload-target="modelVersion"
+                      name="prompt[model_used_version]" id="prompt_model_used_version">
+                      <option value="">-- Select Model Version --</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <div class="row">
+                <div class="col">
+
+                  <div class="form-group mt-4">
+                    <label for="prompt_metadata_seed">
+                      <span class="mr-2" data-toggle="tooltip" ,="" data-placement="bottom" title=""
+                        data-original-title="Seed: Used to limit randomness. Generations with the same prompt, params and seed will result in the same image"><i
+                          class="fa-solid fa-seedling"></i> Seed</span>
+                    </label>
+                    <input class="form-control" data-prompts--upload-target="seed" type="number"
+                      name="prompt[metadata][seed]" id="prompt_metadata_seed">
+
+                  </div>
+
+                </div>
+                <div class="col">
+
+                  <div class="form-group mt-4">
+                    <label for="prompt_metadata_guidance_scale">
+                      <span class="mr-2" data-toggle="tooltip" ,="" data-placement="bottom" title=""
+                        data-original-title="Guidance scale: Determines how similar the image will be to the prompt"><i
+                          class="fa-solid fa-shuffle"></i> Guidance scale</span>
+                    </label>
+                    <input class="form-control" min="1" max="50" step="0.5" data-prompts--upload-target="guidance_scale"
+                      type="number" name="prompt[metadata][guidance_scale]" id="prompt_metadata_guidance_scale">
+
+                  </div>
+
+                </div>
+                <div class="col">
+
+                  <div class="form-group mt-4">
+                    <label for="prompt_metadata_steps">
+                      <span class="mr-2" data-toggle="tooltip" ,="" data-placement="bottom" title=""
+                        data-original-title="Steps: More steps, more quality and time to generate"><i
+                          class="fa-solid fa-stairs"></i> Steps</span>
+                    </label>
+                    <input class="form-control" min="1" max="500" step="1" data-prompts--upload-target="steps"
+                      type="number" name="prompt[metadata][steps]" id="prompt_metadata_steps">
+
+                  </div>
+
+                </div>
+                <div class="col">
+
+                  <div class="form-group mt-4">
+                    <label for="prompt_metadata_sampler">
+                      <span class="mr-2" data-toggle="tooltip" ,="" data-placement="bottom" title=""
+                        data-original-title="Sampler: The diffusion sampling method. Default is k_lms"><i
+                          class="fa-solid fa-eye-dropper"></i> Sampler</span>
+                    </label>
+                    <select class="form-control" data-prompts--upload-target="sampler" name="prompt[metadata][sampler]"
+                      id="prompt_metadata_sampler">
+                      <option value="">- Select -</option>
+                      <option value="ddim">ddim</option>
+                      <option value="plms">plms</option>
+                      <option value="k_lms">k_lms</option>
+                      <option value="k_euler_ancestral">k_euler_ancestral</option>
+                      <option value="k_euler">k_euler</option>
+                      <option value="k_heun">k_heun</option>
+                      <option value="k_dpm_2">k_dpm_2</option>
+                      <option value="k_dpm_2_ancestral">k_dpm_2_ancestral</option>
+                      <option value="dpm++_2_ancestral">dpm++_2_ancestral</option>
+                      <option value="dpm++_2s_ancestral">dpm++_2s_ancestral</option>
+                      <option value="dpm++_2">dpm++_2</option>
+                      <option value="dpm++_2m">dpm++_2m</option>
+                      <option value="dpm++_sde">dpm++_sde</option>
+                      <option value="dpm_fast">dpm_fast</option>
+                      <option value="dpm_adaptive">dpm_adaptive</option>
+                      <option value="dpm2_karras">dpm2_karras</option>
+                      <option value="dpm2_ancestral_karras">dpm2_ancestral_karras</option>
+                      <option value="dpm++_2s_ancestral_karras">dpm++_2s_ancestral_karras</option>
+                      <option value="dpm++_2m_karras">dpm++_2m_karras</option>
+                      <option value="dpm++_sde_karras">dpm++_sde_karras</option>
+                      <option value="lms_karras">lms_karras</option>
+                    </select>
+
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_width">↔ Width</label>
+                    <input class="form-control" min="1" max="2048" step="1" data-prompts--upload-target="width"
+                      type="number" name="prompt[metadata][width]" id="prompt_metadata_width">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_height">↕ Height</label>
+                    <input class="form-control" min="1" max="2048" step="1" data-prompts--upload-target="height"
+                      type="number" name="prompt[metadata][height]" id="prompt_metadata_height">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_model_hash">Model hash</label>
+                    <input class="form-control" data-prompts--upload-target="modelHash" type="text"
+                      name="prompt[metadata][model_hash]" id="prompt_metadata_model_hash">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_program_used">Program Used</label>
+                    <select class="form-control" data-prompts--upload-target="programUsed"
+                      name="prompt[metadata][program_used]" id="prompt_metadata_program_used">
+                      <option value="">-- Select Program --</option>
+                      <option value="AUTOMATIC1111">AUTOMATIC1111</option>
+                      <option value="NMKD">NMKD</option>
+                      <option value="InvokeAI">InvokeAI</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="row">
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_upscaler">Upscaler</label>
+                    <select class="form-control" name="prompt[metadata][upscaler]" id="prompt_metadata_upscaler">
+                      <option value="">-- Select Sampler --</option>
+                      <option value="ESRGAN 4x">ESRGAN 4x</option>
+                      <option value="CodeFormer">CodeFormer</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_denoising_strength">Denoising strength</label>
+                    <input class="form-control" min="0" max="1" step="0.01" type="number"
+                      name="prompt[metadata][denoising_strength]" id="prompt_metadata_denoising_strength">
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="prompt_metadata_mask_blur">Mask blur</label>
+                    <input class="form-control" min="0" max="100" step="1" type="number"
+                      name="prompt[metadata][mask_blur]" id="prompt_metadata_mask_blur">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+
+
+</body>
+
+
+</html>
