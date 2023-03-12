@@ -31,7 +31,9 @@ const parseMetadata = (file, callback) => {
       // Same as above but just the other way around
       embed.prompt = embed.prompt.match(/[^\[\]]+(?=\[(.*)\]|$)/g).join(', ')
 
-      embed.program_used = "InvokeAI"
+      if (embed.app_id === "invoke-ai/InvokeAI") {
+          embed.program_used = embed.model_hash === 0 ? "NMKD" : "InvokeAI"
+      }
     }
     catch (e) {
       // Rethrow unless parsing as JSON failed
@@ -70,6 +72,7 @@ const parseMetadata = (file, callback) => {
         height,
       }
 
+      // @TODO: verify the strict use of this software
       embed.program_used = "AUTOMATIC1111"
     }
 
@@ -83,7 +86,7 @@ const parseMetadata = (file, callback) => {
     embed.negative_prompt = normalizer(embed.negative_prompt)
 
     // Handles the matching website
-    console.log("Metadata parsed!", embed);
+    console.log("parseMetadata.js: Metadata parsed!", embed);
     embed = enrichMetadataForPromptHero(embed);
     callback(embed);
   }
@@ -92,12 +95,12 @@ const parseMetadata = (file, callback) => {
 }
 
 const enrichMetadataForPromptHero = promptInfo => {
-  var richPromptInfo = promptInfo;
+  const richPromptInfo = promptInfo;
 
   richPromptInfo.sampler_raw = promptInfo.sampler;
   richPromptInfo.sampler = findSamplerByName(promptInfo.sampler);
 
-  richPromptInfo.upscaler_raw = promptInfo.hires_upscaler || "";
+  richPromptInfo.upscaler_raw = promptInfo.hires_upscaler;
   richPromptInfo.upscaler = findUpscaler(promptInfo.hires_upscaler);
 
   const { model, version } = findModelByHash(promptInfo.model_hash)
