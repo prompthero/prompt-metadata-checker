@@ -1,12 +1,12 @@
 import getTextFromImage from "vendor/postie/exifMetadataExtractor"
 
-import { findSamplerByName, findUpscaler, findModelByHash } from "vendor/postie/dataEnricher"
+import { findSamplerByName, findUpscaler, findModelByHash, generateSha256Hash } from "vendor/postie/dataEnricher"
 
 // Parses the PNG/JPEG metadata
 const parseMetadata = (file, callback) => {
   const fr = new FileReader()
 
-  fr.onload = () => {
+  fr.onload = async() => {
     let embed = getTextFromImage(fr.result)
 
     try {
@@ -78,23 +78,23 @@ const parseMetadata = (file, callback) => {
 
     // Normalization
     const normalizer = str => str?.trim()
-      .replace(/,( ?,)+/g, ',')          // separates with a maximum of one comma
-      .replace(/^[\s?,]+|[\s?,]+$/g, '') // removes trailing/leading commas and whitespace
-      .replace(/\s+/g, ' ')              // uses single spaces only
+      .replace(/(\s*,\s*)+/g, ', ')    // separates with a maximum of one comma
+      .replace(/^[\s,]+|[\s,]+$/g, '') // removes trailing/leading commas and whitespace
+      .replace(/\s+/g, ' ')            // uses single spaces only
 
     embed.prompt = normalizer(embed.prompt)
     embed.negative_prompt = normalizer(embed.negative_prompt)
 
     // Handles the matching website
     console.log("parseMetadata.js: Metadata parsed!", embed);
-    embed = enrichMetadataForPromptHero(embed);
+    embed = await enrichMetadataForPromptHero(embed, fr.result);
     callback(embed);
   }
 
   fr.readAsArrayBuffer(file)
 }
 
-const enrichMetadataForPromptHero = promptInfo => {
+const enrichMetadataForPromptHero = async(promptInfo, arrayBuffer) => {
   const richPromptInfo = promptInfo;
 
   richPromptInfo.sampler_raw = promptInfo.sampler;
@@ -106,6 +106,8 @@ const enrichMetadataForPromptHero = promptInfo => {
   const { model, version } = findModelByHash(promptInfo.model_hash)
   richPromptInfo.model_used = model;
   richPromptInfo.model_used_version = version;
+
+  richPromptInfo.image_hash = await generateSha256Hash(arrayBuffer)
 
   return richPromptInfo;
 }
