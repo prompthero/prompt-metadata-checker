@@ -106,21 +106,21 @@ export default class extends Controller {
     // Waits until the AJAX is done
     onDone.then( e => {
       modelVers.value = promptInfo.model_used_version
-    });
 
-    /*
-    if (modelSlug.value)
-      modelSlug.setAttribute('disabled', true)
-    else
-      modelSlug.value = ''
-  
-    if (modelVers.value)
-      modelVers.setAttribute('disabled', true)
-    else
-      modelVers.value = ''
-    */
-    if (!modelSlug.value) modelSlug.value = ''
-    if (!modelVers.value) modelVers.value = ''
+      /*
+      if (modelSlug.value)
+        modelSlug.setAttribute('disabled', true)
+      else
+        modelSlug.value = ''
+    
+      if (modelVers.value)
+        modelVers.setAttribute('disabled', true)
+      else
+        modelVers.value = ''
+      */
+      if (!modelSlug.value) modelSlug.value = ''
+      if (!modelVers.value) modelVers.value = ''
+    });
   }
 
 }
