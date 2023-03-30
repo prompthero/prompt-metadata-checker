@@ -22,7 +22,7 @@ const getTextFromImage = arrayBuffer => {
         return (uint8Array[start] << 8) | uint8Array[start + 1]
 
       case '32-bit':
-        return  (uint8Array[start]     << 24) |
+        return  (uint8Array[start] << 24) |
             (uint8Array[start + 1] << 16) |
             (uint8Array[start + 2] << 8)  |
              uint8Array[start + 3]

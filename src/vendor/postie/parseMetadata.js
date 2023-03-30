@@ -1,12 +1,12 @@
 import getTextFromImage from "vendor/postie/exifMetadataExtractor"
 
-import { findSamplerByName, findUpscaler, findModelByHash } from "vendor/postie/dataEnricher"
+import { findSamplerByName, findUpscaler, findModelByHash, generateSha256Hash } from "vendor/postie/dataEnricher"
 
 // Parses the PNG/JPEG metadata
 const parseMetadata = (file, callback) => {
   const fr = new FileReader()
 
-  fr.onload = () => {
+  fr.onload = async() => {
     let embed = getTextFromImage(fr.result)
 
     try {
@@ -31,7 +31,9 @@ const parseMetadata = (file, callback) => {
       // Same as above but just the other way around
       embed.prompt = embed.prompt.match(/[^\[\]]+(?=\[(.*)\]|$)/g).join(', ')
 
-      embed.program_used = "InvokeAI"
+      if (embed.app_id === "invoke-ai/InvokeAI") {
+          embed.program_used = embed.model_hash === 0 ? "NMKD" : "InvokeAI"
+      }
     }
     catch (e) {
       // Rethrow unless parsing as JSON failed
@@ -70,39 +72,42 @@ const parseMetadata = (file, callback) => {
         height,
       }
 
+      // @TODO: verify the strict use of this software
       embed.program_used = "AUTOMATIC1111"
     }
 
     // Normalization
     const normalizer = str => str?.trim()
-      .replace(/,( ?,)+/g, ',')          // separates with a maximum of one comma
-      .replace(/^[\s?,]+|[\s?,]+$/g, '') // removes trailing/leading commas and whitespace
-      .replace(/\s+/g, ' ')              // uses single spaces only
+      .replace(/(\s*,\s*)+/g, ', ')    // separates with a maximum of one comma
+      .replace(/^[\s,]+|[\s,]+$/g, '') // removes trailing/leading commas and whitespace
+      .replace(/\s+/g, ' ')            // uses single spaces only
 
     embed.prompt = normalizer(embed.prompt)
     embed.negative_prompt = normalizer(embed.negative_prompt)
 
     // Handles the matching website
-    console.log("Metadata parsed!", embed);
-    embed = enrichMetadataForPromptHero(embed);
+    console.log("parseMetadata.js: Metadata parsed!", embed);
+    embed = await enrichMetadataForPromptHero(embed, fr.result);
     callback(embed);
   }
 
   fr.readAsArrayBuffer(file)
 }
 
-const enrichMetadataForPromptHero = promptInfo => {
-  var richPromptInfo = promptInfo;
+const enrichMetadataForPromptHero = async(promptInfo, arrayBuffer) => {
+  const richPromptInfo = promptInfo;
 
   richPromptInfo.sampler_raw = promptInfo.sampler;
   richPromptInfo.sampler = findSamplerByName(promptInfo.sampler);
 
-  richPromptInfo.upscaler_raw = promptInfo.hires_upscaler || "";
+  richPromptInfo.upscaler_raw = promptInfo.hires_upscaler;
   richPromptInfo.upscaler = findUpscaler(promptInfo.hires_upscaler);
 
   const { model, version } = findModelByHash(promptInfo.model_hash)
   richPromptInfo.model_used = model;
   richPromptInfo.model_used_version = version;
+
+  richPromptInfo.image_hash = await generateSha256Hash(arrayBuffer)
 
   return richPromptInfo;
 }

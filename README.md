@@ -1,10 +1,10 @@
 # Prompt Metadata Checker for Stable Diffusion Images
 
-Reads the metadata of an AI generated image (using the `Exif` or `tEXT` enclosed in that image file). Populates the prompt, seed, sampler, and more. Known to work well with images generated using AUTOMATIC1111, InvokeAI or NMKD. Supports both `.png` and `.jpeg` images.
-
-If you run into any issues: please open up an Issue here on Github or talk to us on Discord.
+Reads the metadata of an AI generated image (using the `Exif` or `tEXT` enclosed in that image file). Populates the prompt, seed, sampler, and more. Known to work well with images generated using AUTOMATIC1111, InvokeAI or NMKD. Supports both `.jpeg` and `.png` images.
 
 This is a port into PromptHero of a community extension originally made by [@HE1CO](https://github.com/HE1CO/Postie) and later revamped by [@drhino](https://github.com/drhino)
+
+If you run into any issues: please open up an Issue here on Github or [talk to us on Discord](https://discord.com/channels/1026222136790110259) 👋
 
 
 ## Motivation

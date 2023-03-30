@@ -1,10 +1,24 @@
 import hashes from "vendor/postie/modelHashes"
 
+/**
+ * Returns the model and version from the model_hash
+ *  The returned values are fixed identifiers from PromptHero.com
+ * @param {string} hash
+ * @returns { { model: string|undefined, version: string|undefined } }
+ */
 const findModelByHash = hash => {
   if (hash) {
+    const hash_lowercase = hash.toLowerCase()
+
     for (const [model, versions] of Object.entries(hashes)) {
       for (const [version, hashes] of Object.entries(versions)) {
 
+        if (hashes.find(x => hash_lowercase.length === 10 ?
+            x.toLowerCase().startsWith(hash_lowercase) : x.toLowerCase() === hash_lowercase)) {
+          return { model, version }
+        }
+
+        /*
         // Matches hash from Civit AI
         if (hashes.includes(hash.toUpperCase())) {
           return { model, version }
@@ -14,6 +28,7 @@ const findModelByHash = hash => {
         if (hashes.includes(hash.toLowerCase())) {
           return { model, version }
         }
+        */
       }
     }
   }
@@ -23,9 +38,10 @@ const findModelByHash = hash => {
 
 
 /**
+ * Returns the normalized sampler name, if available on PromptHero.com
  * @param {string} sampler
- * @returns {string}
-*/
+ * @returns {string|undefined}
+ */
 const findSamplerByName = sampler => {
   // @TODO: are these mappings correct? and complete?
   const samplersDict = {
@@ -52,25 +68,41 @@ const findSamplerByName = sampler => {
     "lms_karras":                ["LMS Karras", "k_lms_karras"],
   }
 
-  return Object.keys(samplersDict).find(
-        x => x === sampler.toLowerCase() || samplersDict[x].includes(sampler)
-    ) ?? sampler
+  return Object.keys(samplersDict).find(x => samplersDict[x].includes(sampler))
 }
 
 
 /**
- * @param {string} hires_upscaler
- * @returns {string}
-*/
+ * Returns the normalized upscaler, if available on PromptHero.com
+ * @param {string|undefined} hires_upscaler
+ * @returns {string|undefined}
+ */
 const findUpscaler = hires_upscaler => {
-  if (hires_upscaler && hires_upscaler.indexOf('ESRGAN 4x') !== -1) {
+  if ( ! hires_upscaler ) {
+    return 
+  }
+
+  if (hires_upscaler.indexOf('ESRGAN 4x') !== -1) {
     return 'ESRGAN 4x'
   }
-  else if (hires_upscaler && hires_upscaler.indexOf('CodeFormer') !== -1) {
+
+  if (hires_upscaler.indexOf('CodeFormer') !== -1) {
     return 'CodeFormer'
-  } else {
-    return ''
   }
 }
 
-export { findModelByHash, findSamplerByName, findUpscaler };
+
+/**
+ * Generates the SHA-256 hash of a file
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {string} SHA-256
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
+ */
+const generateSha256Hash = async(arrayBuffer) => Array.from(
+  new Uint8Array( await crypto.subtle.digest('SHA-256', arrayBuffer) )
+).map(
+    x => x.toString(16).padStart(2, '0')
+).join('')
+
+
+export { findModelByHash, findSamplerByName, findUpscaler, generateSha256Hash };
