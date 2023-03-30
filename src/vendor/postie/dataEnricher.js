@@ -13,7 +13,8 @@ const findModelByHash = hash => {
     for (const [model, versions] of Object.entries(hashes)) {
       for (const [version, hashes] of Object.entries(versions)) {
 
-        if (hashes.find(x => x.toLowerCase() === hash_lowercase)) {
+        if (hashes.find(x => hash_lowercase.length === 10 ?
+            x.toLowerCase().startsWith(hash_lowercase) : x.toLowerCase() === hash_lowercase)) {
           return { model, version }
         }
 
